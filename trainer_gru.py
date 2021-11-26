@@ -1236,7 +1236,7 @@ class Trainer:
 
         # loading adam state
 #         torch.cuda.set_device(1)
-        print(GPUtil.showUtilization())
+#         print(GPUtil.showUtilization())
 
         optimizer_load_path = os.path.join(self.opt.load_weights_folder, "adam.pth")
         if os.path.isfile(optimizer_load_path):
