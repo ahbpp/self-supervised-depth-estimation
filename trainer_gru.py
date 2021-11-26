@@ -77,26 +77,26 @@ class Trainer:
         
         self.models["encoder"] = networks.ResnetEncoder(
             self.opt.num_layers, self.opt.weights_init == "pretrained")
-        if self.opt.mono_pretrained:
-            path = 'models/mono_640x192/encoder.pth'
-            model_dict = self.models["encoder"].state_dict()
-            pretrained_dict = torch.load(path)
-            pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
-            model_dict.update(pretrained_dict)
-            self.models["encoder"].load_state_dict(model_dict)
+        # if self.opt.mono_pretrained:
+        #     path = 'models/mono_640x192/encoder.pth'
+        #     model_dict = self.models["encoder"].state_dict()
+        #     pretrained_dict = torch.load(path)
+        #     pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
+        #     model_dict.update(pretrained_dict)
+        #     self.models["encoder"].load_state_dict(model_dict)
         device = torch.device(f'cuda:{self.opt.depth_encoder_gpu_id}')
         self.models["encoder"].to(device)
         self.parameters_to_train += list(self.models["encoder"].parameters())             
 
         self.models["depth"] = networks.DepthDecoder(
             self.models["encoder"].num_ch_enc, self.opt.scales)
-        if self.opt.mono_pretrained:
-            path = 'models/mono_640x192/depth.pth'
-            model_dict = self.models["depth"].state_dict()
-            pretrained_dict = torch.load(path)
-            pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
-            model_dict.update(pretrained_dict)
-            self.models["depth"].load_state_dict(model_dict)
+        # if self.opt.mono_pretrained:
+        #     path = 'models/mono_640x192/depth.pth'
+        #     model_dict = self.models["depth"].state_dict()
+        #     pretrained_dict = torch.load(path)
+        #     pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
+        #     model_dict.update(pretrained_dict)
+        #     self.models["depth"].load_state_dict(model_dict)
         device = torch.device(f'cuda:{self.opt.depth_decoder_gpu_id}')
         self.models["depth"].to(device)
         self.parameters_to_train += list(self.models["depth"].parameters())     
@@ -163,13 +163,13 @@ class Trainer:
             self.opt.num_layers,
             self.opt.weights_init == "pretrained",
             num_input_images=self.num_pose_frames)
-        if self.opt.mono_pretrained:
-            path = 'models/mono_640x192/pose_encoder.pth'
-            model_dict = self.models["pose_encoder"].state_dict()
-            pretrained_dict = torch.load(path)
-            pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
-            model_dict.update(pretrained_dict)
-            self.models["pose_encoder"].load_state_dict(model_dict)
+        # if self.opt.mono_pretrained:
+        #     path = 'models/mono_640x192/pose_encoder.pth'
+        #     model_dict = self.models["pose_encoder"].state_dict()
+        #     pretrained_dict = torch.load(path)
+        #     pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
+        #     model_dict.update(pretrained_dict)
+        #     self.models["pose_encoder"].load_state_dict(model_dict)
         device = torch.device(f'cuda:{self.opt.pose_encoder_gpu_id}')
         self.models["pose_encoder"].to(device)
         self.parameters_to_train += list(self.models["pose_encoder"].parameters()) 
@@ -179,13 +179,13 @@ class Trainer:
             self.models["pose_encoder"].num_ch_enc,
             num_input_features=1,
             num_frames_to_predict_for=2)
-        if self.opt.mono_pretrained:
-            path = 'models/mono_640x192/pose.pth'
-            model_dict = self.models["pose"].state_dict()
-            pretrained_dict = torch.load(path)
-            pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
-            model_dict.update(pretrained_dict)
-            self.models["pose"].load_state_dict(model_dict)
+        # if self.opt.mono_pretrained:
+        #     path = 'models/mono_640x192/pose.pth'
+        #     model_dict = self.models["pose"].state_dict()
+        #     pretrained_dict = torch.load(path)
+        #     pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
+        #     model_dict.update(pretrained_dict)
+        #     self.models["pose"].load_state_dict(model_dict)
         device = torch.device(f'cuda:{self.opt.pose_encoder_gpu_id}')
         self.models["pose"].to(device)
         self.parameters_to_train += list(self.models["pose"].parameters())
