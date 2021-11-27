@@ -102,28 +102,34 @@ class KITTIDataset_v1(Dataset):
         frame_fnames = [self.get_image_path(x, sequence_name) for x in frame_range]
 
         do_flip = self.is_train and random.random() > 0.5
-        do_color_aug = self.is_train and random.random() > 0.5
         
         inputs = {}
         
         # center images
-        colors = [self.get_color(x, do_flip, do_color_aug) for x in frame_fnames[1:self.n + 1]]
+        colors = [self.get_color(x, do_flip) for x in frame_fnames[1:self.n + 1]]
         for i in range(4):
             for j, color in enumerate(colors):
-                rgb = np.array(color[i])
+                rgb = color[i]
 #                 rgb = np.transpose(rgb, (2, 0, 1))
                 inputs[('color', 0, i, j)] = self.to_tensor(rgb).float()
+        for j, color in enumerate(colors):
+            rgb = color[0]
+            do_color_aug = self.is_train and random.random() > 0.5
+            if do_color_aug:
+                rgb = self.color_aug(rgb)
+            inputs[('color_aug', j)] = self.to_tensor(rgb).float()
+
         
         # left images
-        colors = [self.get_color(x, do_flip, do_color_aug) for x in frame_fnames[:self.n]]
+        colors = [self.get_color(x, do_flip) for x in frame_fnames[:self.n]]
         for i in range(4):
             for j, color in enumerate(colors):
-                rgb = np.array(color[i])
+                rgb = color[i]
 #                 rgb = np.transpose(rgb, (2, 0, 1))
                 inputs[('color', -1, i, j)] = self.to_tensor(rgb).float()
 
         # right images
-        colors = [self.get_color(x, do_flip, do_color_aug) for x in frame_fnames[2:]]
+        colors = [self.get_color(x, do_flip) for x in frame_fnames[2:]]
         for i in range(4):
             for j, color in enumerate(colors):
                 rgb = np.array(color[i])
@@ -156,7 +162,7 @@ class KITTIDataset_v1(Dataset):
         return image_path
 
 
-    def get_color(self, image_path, do_flip, do_color_aug):
+    def get_color(self, image_path, do_flip):
         colors = {}
         
         color = self.loader(image_path)
@@ -166,11 +172,8 @@ class KITTIDataset_v1(Dataset):
 
             if do_flip:
                 color = color.transpose(Image.FLIP_LEFT_RIGHT)
-
-            if do_color_aug:
-                color = self.color_aug(color)
             
-            colors[i] = np.asarray(color)
+            colors[i] = color
 
         return colors
 

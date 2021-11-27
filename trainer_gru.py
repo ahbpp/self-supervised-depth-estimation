@@ -719,7 +719,7 @@ class Trainer:
         
         # we dont take left and right images because theu are for pose estimation
         device = torch.device(f'cuda:{self.opt.depth_encoder_gpu_id}')
-        enc_input = torch.cat([inputs[("color", 0, 0, i)] for i in range(n)]).to(device)
+        enc_input = torch.cat([inputs[('color_aug', i)] for i in range(n)]).to(device)
         features = self.models["encoder"](enc_input)
         depth_outputs = self.models["depth"](features, True)
 
