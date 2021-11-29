@@ -94,7 +94,7 @@ def get_image_path(frame_index, sequence_name):
         f_str = "{:010d}.jpg".format(frame_index)
         
         image_path = os.path.join(
-            'kitti_data', 
+            '/home/ankarpov/Datasets/kitti',
             scene_date, 
             scene_name, 
             "image_02", 
@@ -639,7 +639,7 @@ def evaluate_v8_seq(opt, test_files, encoder, depth_decoder, gru):
 
 
 def evaluate_v9_v10_seq(opt, test_files, encoder, depth_decoder, gru):
-    n_prev_images = 10
+    n_prev_images = 8
     test_scenes = sorted(list(test_files.keys()))
     pred_disps = []
     interp = Image.ANTIALIAS

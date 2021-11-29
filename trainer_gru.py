@@ -6,6 +6,8 @@
 
 from __future__ import absolute_import, division, print_function
 
+import os.path
+
 import numpy as np
 import time
 
@@ -31,6 +33,8 @@ from collections import defaultdict
 
 from gru_utils import count_scene_frames_func, generate_frame_seq_func, get_mask_func, get_context_vectors, get_context_vector
 
+
+PATH_MONO_MODELS_WEIGHTS = "/home/ankarpov/models_weights/mono_640x192"
 
 class Trainer:
     def __init__(self, options):
@@ -77,26 +81,28 @@ class Trainer:
         
         self.models["encoder"] = networks.ResnetEncoder(
             self.opt.num_layers, self.opt.weights_init == "pretrained")
-        # if self.opt.mono_pretrained:
-        #     path = 'models/mono_640x192/encoder.pth'
-        #     model_dict = self.models["encoder"].state_dict()
-        #     pretrained_dict = torch.load(path)
-        #     pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
-        #     model_dict.update(pretrained_dict)
-        #     self.models["encoder"].load_state_dict(model_dict)
+        if self.opt.mono_pretrained:
+            path = os.path.join(PATH_MONO_MODELS_WEIGHTS, 'encoder.pth')
+            model_dict = self.models["encoder"].state_dict()
+            pretrained_dict = torch.load(path)
+            pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
+            model_dict.update(pretrained_dict)
+            self.models["encoder"].load_state_dict(model_dict)
+            print(f"Encoder was loaded from {path}")
         device = torch.device(f'cuda:{self.opt.depth_encoder_gpu_id}')
         self.models["encoder"].to(device)
         self.parameters_to_train += list(self.models["encoder"].parameters())             
 
         self.models["depth"] = networks.DepthDecoder(
             self.models["encoder"].num_ch_enc, self.opt.scales)
-        # if self.opt.mono_pretrained:
-        #     path = 'models/mono_640x192/depth.pth'
-        #     model_dict = self.models["depth"].state_dict()
-        #     pretrained_dict = torch.load(path)
-        #     pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
-        #     model_dict.update(pretrained_dict)
-        #     self.models["depth"].load_state_dict(model_dict)
+        if self.opt.mono_pretrained:
+            path = os.path.join(PATH_MONO_MODELS_WEIGHTS, 'depth.pth')
+            model_dict = self.models["depth"].state_dict()
+            pretrained_dict = torch.load(path)
+            pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
+            model_dict.update(pretrained_dict)
+            self.models["depth"].load_state_dict(model_dict)
+            print(f"Depth decoder was loaded from {path}")
         device = torch.device(f'cuda:{self.opt.depth_decoder_gpu_id}')
         self.models["depth"].to(device)
         self.parameters_to_train += list(self.models["depth"].parameters())     
@@ -163,13 +169,14 @@ class Trainer:
             self.opt.num_layers,
             self.opt.weights_init == "pretrained",
             num_input_images=self.num_pose_frames)
-        # if self.opt.mono_pretrained:
-        #     path = 'models/mono_640x192/pose_encoder.pth'
-        #     model_dict = self.models["pose_encoder"].state_dict()
-        #     pretrained_dict = torch.load(path)
-        #     pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
-        #     model_dict.update(pretrained_dict)
-        #     self.models["pose_encoder"].load_state_dict(model_dict)
+        if self.opt.mono_pretrained:
+            path = os.path.join(PATH_MONO_MODELS_WEIGHTS, 'pose_encoder.pth')
+            model_dict = self.models["pose_encoder"].state_dict()
+            pretrained_dict = torch.load(path)
+            pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
+            model_dict.update(pretrained_dict)
+            self.models["pose_encoder"].load_state_dict(model_dict)
+            print(f"Pose encoder was loaded from {path}")
         device = torch.device(f'cuda:{self.opt.pose_encoder_gpu_id}')
         self.models["pose_encoder"].to(device)
         self.parameters_to_train += list(self.models["pose_encoder"].parameters()) 
@@ -179,13 +186,14 @@ class Trainer:
             self.models["pose_encoder"].num_ch_enc,
             num_input_features=1,
             num_frames_to_predict_for=2)
-        # if self.opt.mono_pretrained:
-        #     path = 'models/mono_640x192/pose.pth'
-        #     model_dict = self.models["pose"].state_dict()
-        #     pretrained_dict = torch.load(path)
-        #     pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
-        #     model_dict.update(pretrained_dict)
-        #     self.models["pose"].load_state_dict(model_dict)
+        if self.opt.mono_pretrained:
+            path = os.path.join(PATH_MONO_MODELS_WEIGHTS, 'pose.pth')
+            model_dict = self.models["pose"].state_dict()
+            pretrained_dict = torch.load(path)
+            pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
+            model_dict.update(pretrained_dict)
+            self.models["pose"].load_state_dict(model_dict)
+            print(f"Pose decoder was loaded from {path}")
         device = torch.device(f'cuda:{self.opt.pose_encoder_gpu_id}')
         self.models["pose"].to(device)
         self.parameters_to_train += list(self.models["pose"].parameters())
@@ -233,7 +241,7 @@ class Trainer:
                                   pin_memory=True, drop_last=True)
         self.val_loader = DataLoader(val_dataset, self.opt.batch_size, False, 
                                 num_workers=self.opt.num_workers, pin_memory=True, drop_last=False)
-#         self.val_iter = iter(self.val_loader)
+        self.val_iter = iter(self.val_loader)
         print('Dataloaders created')
         
         # initialize writers
@@ -338,11 +346,11 @@ class Trainer:
             if early_phase or late_phase:
                 self.log_time(batch_idx, duration, losses["loss"].cpu().data)
 
-                # if "depth_gt" in inputs:
-                    # self.compute_depth_losses(inputs, outputs, losses)
+                if "depth_gt" in inputs:
+                    self.compute_depth_losses(inputs, outputs, losses)
 
-                # self.log("train", inputs, outputs, losses)
-                # self.val()
+                self.log("train", inputs, outputs, losses)
+                self.val()
 
             self.step += 1
 
@@ -353,7 +361,8 @@ class Trainer:
         
         # we dont take left and right images because theu are for pose estimation
         device = torch.device(f'cuda:{self.opt.depth_encoder_gpu_id}')
-        enc_input = torch.cat([inputs[("color", 0, 0, i)] for i in range(n)]).to(device)
+        # enc_input = torch.cat([inputs[("color", 0, 0, i)] for i in range(n)]).to(device)
+        enc_input = torch.cat([inputs[('color_aug', i)] for i in range(n)]).to(device)
         features = self.models["encoder"](enc_input)
         depth_outputs = self.models["depth"](features, False)
 
@@ -719,6 +728,7 @@ class Trainer:
         
         # we dont take left and right images because theu are for pose estimation
         device = torch.device(f'cuda:{self.opt.depth_encoder_gpu_id}')
+        # enc_input = torch.cat([inputs[("color", 0, 0, i)] for i in range(n)]).to(device)
         enc_input = torch.cat([inputs[('color_aug', i)] for i in range(n)]).to(device)
         features = self.models["encoder"](enc_input)
         depth_outputs = self.models["depth"](features, True)
@@ -1155,21 +1165,22 @@ class Trainer:
         writer = self.writers[mode]
         for l, v in losses.items():
             writer.add_scalar("{}".format(l), v, self.step)
-
-        for j in range(min(4, self.opt.batch_size)):  # write a maxmimum of four images
+        n = self.opt.len_sequence
+        for j in range(1):#range(min(4, self.opt.batch_size)):  # write a maxmimum of four images
             for s in self.opt.scales:
                 for frame_id in [0, -1, 1]: #self.opt.frame_ids:
+                    inp_color = torch.cat([inputs[("color", frame_id, s, i)] for i in range(n)], 0)
                     writer.add_image(
                         "color_{}_{}/{}".format(frame_id, s, j),
-                        inputs[("color", frame_id, s)][j].data, self.step)
+                        inp_color[-1].data, self.step)
                     if s == 0 and frame_id != 0:
                         writer.add_image(
                             "color_pred_{}_{}/{}".format(frame_id, s, j),
-                            outputs[("color", frame_id, s)][j].data, self.step)
+                            outputs[("color", frame_id, s)][-1].data, self.step)
 
                 writer.add_image(
                     "disp_{}/{}".format(s, j),
-                    normalize_image(outputs[("disp", s)][j]), self.step)
+                    normalize_image(outputs[("disp", s)][-1]), self.step)
 
                 if self.opt.predictive_mask:
                     for f_idx, frame_id in enumerate([-1, 1]):#self.opt.frame_ids[1:]):
@@ -1195,9 +1206,17 @@ class Trainer:
             json.dump(to_save, f, indent=2)
 
     def save_model(self):
+        self._save_model("last_weights")
+        try:
+            if self.epoch % 10 == 0:
+                self._save_model("weights_epoch_{}".format(self.epoch))
+        except:
+            print("smth wrong")
+
+    def _save_model(self, name="last_weights"):
         """Save model weights to disk
         """
-        save_folder = os.path.join(self.log_path, "models", "weights_{}".format(self.epoch))
+        save_folder = os.path.join(self.log_path, "models", name)
         if not os.path.exists(save_folder):
             os.makedirs(save_folder)
 
