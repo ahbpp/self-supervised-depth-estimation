@@ -34,7 +34,8 @@ from collections import defaultdict
 from gru_utils import count_scene_frames_func, generate_frame_seq_func, get_mask_func, get_context_vectors, get_context_vector
 
 
-PATH_MONO_MODELS_WEIGHTS = "/home/ankarpov/models_weights/mono_640x192"
+# PATH_MONO_MODELS_WEIGHTS = "/home/ankarpov/models_weights/mono_640x192"
+PATH_MONO_MODELS_WEIGHTS = "/home/jovyan/models_weights/mono_640x192"
 
 class Trainer:
     def __init__(self, options):
