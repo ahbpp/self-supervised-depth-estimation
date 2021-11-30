@@ -239,9 +239,10 @@ class Trainer:
         val_dataset = datasets.KITTIDataset_v1(data_path, 192, 640, n, val_tuples, False)
         
         self.train_loader = DataLoader(train_dataset, self.opt.batch_size, True, num_workers=self.opt.num_workers,
-                                  pin_memory=True, drop_last=True)
+                                       pin_memory=True, drop_last=True, persistent_workers=True)
         self.val_loader = DataLoader(val_dataset, self.opt.batch_size, False, 
-                                num_workers=self.opt.num_workers, pin_memory=True, drop_last=False)
+                                     num_workers=self.opt.num_workers, pin_memory=True, drop_last=False,
+                                     persistent_workers=True)
         self.val_iter = iter(self.val_loader)
         print('Dataloaders created')
         
