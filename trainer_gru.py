@@ -1210,7 +1210,7 @@ class Trainer:
     def save_model(self):
         self._save_model("last_weights")
         try:
-            if self.epoch % 10 == 0:
+            if self.epoch % 5 == 0:
                 self._save_model("weights_epoch_{}".format(self.epoch))
         except:
             print("smth wrong")
