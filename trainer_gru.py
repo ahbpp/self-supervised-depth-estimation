@@ -1194,7 +1194,7 @@ class Trainer:
                 elif not self.opt.disable_automasking:
                     writer.add_image(
                         "automask_{}/{}".format(s, j),
-                        outputs["identity_selection/{}".format(s)][j][None, ...], self.step)
+                        outputs["identity_selection/{}".format(s)][-1][None, ...], self.step)
 
     def save_opts(self):
         """Save options to disk so we know what we ran this experiment with
